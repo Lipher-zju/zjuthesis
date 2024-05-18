@@ -107,7 +107,7 @@ Sentence Transformers在服务监管语言的实现中可以用于自动化地�
 \begin{itemize}
     \item \textbf{通用性：} HORAE 必须是领域无关的，能够适应不同领域以及多语言环境下的监管规则。这些规则在特定领域的术语、模式和写作风格上可能存在显著差异。因此，我们需要一个通用的设计范式，它能够抽象出领域特定的元素，同时能够表达跨领域通用的规则模式。
     \item \textbf{结构化：} 在确保 HORAE 的通用性的同时，也需要保证其（半）结构化特性。这样的设计可以使得监管规则能够有效地被存储、检查和操作，并且尽可能地减少潜在的歧义，从而提高规则的可理解性和可操作性。
-    \item \textbf{自动化：} HORAE 的设计注重简化模式和结构，以便可以利用语法解析器或大型语言模型（LLMs）等工具，实现从自然语言表述的监管规则到形式化建模语言的自动转换。这一自动化过程将极大地提升规则处理的效率和准确性。
+    \item \textbf{自动化：} HORAE 的设计注重简化模式和结构，以便可以利用语法解析器或大语言模型（LLMs）等工具，实现从自然语言表述的监管规则到形式化建模语言的自动转换。这一自动化过程将极大地提升规则处理的效率和准确性。
     \item \textbf{可量化：} 考虑到监管规则的执行可能涉及不确定性，HORAE语言不仅应编码监管规则的定性信息（即规则是否可被满足），还应包含定量信息（即规则满足的概率）。这种量化的信息对于评估和优化监管策略至关重要。
 \end{itemize}
 
@@ -140,7 +140,7 @@ Sentence Transformers在服务监管语言的实现中可以用于自动化地�
 
 
 \begin{itemize}
-    \item \textbf{顶层语法：} 在这一层，基本事件被视为最小的句法单位，它们将在形式语义中被解释为命题。该语法允许通过逻辑连接词组合基本事件，并指定所得到的规则的类型——“shall”、“should”和“forbid”，分别代表强制执行、推荐和禁止的行为。对于具有时间属性的规则，相应的基本事件可以与时间戳$\tau$相关联，表示其发生的时间；此外，时间戳$\tau$ = {$\tau1$, $\tau2$, ...}上的时间约束被收集到C($\tau$ )中，它作为规则中的一种特定形式的基本事件。
+    \item \textbf{顶层语法：} 在这一层，基本事件被视为最小的基本事件单位，它们将在形式语义中被解释为命题。该语法允许通过逻辑连接词组合基本事件，并指定所得到的规则的类型——“shall”、“should”和“forbid”，分别代表强制执行、推荐和禁止的行为。对于具有时间属性的规则，相应的基本事件可以与时间戳$\tau$相关联，表示其发生的时间；此外，时间戳$\tau$ = {$\tau1$, $\tau2$, ...}上的时间约束被收集到C($\tau$ )中，它作为规则中的一种特定形式的基本事件。
     \item \textbf{底层语法：} 在这一层，描述了从规则数据集中提取的基本事件的组成成分。关键成分包括：(i) action：基本事件的行为；(ii) object：动作的行为者或接受者——通常是一个可检测的目标；(iii) attribute：对象或动作的属性（由.运算符选择），如数量、颜色、长度等；以及(iv) attribute $\diamond$ value，其中$\diamond \in \{<, >, \leq, \geq, =\}$。某些属性与给定值（例如阈值、颜色等）的比较，这在服务监管中常用。
 \end{itemize}
 
@@ -182,7 +182,7 @@ Antlr的使用分为几个步骤：首先，定义语言的词法规则（Lexer�
 
 此外，采用大语言模型还为 HORAE 带来了增量式处理的能力。与需要从头重建的传统编程语言语法分析器不同，大语言模型可以通过 RuleGPT 使用 LoRA（低阶适应）技术进行微调，保留先前知识，仅通过额外的数据集对 LLMs 进行微调，以适应新的事件模式，无需对整个基准数据集重新训练。这一特性极大地增强了 HORAE 的灵活性和可维护性。
 
-有关使用大语言模型进行语法分析的实现细节，请参见第5章 \textbf{自动化}。
+有关使用大语言模型进行语法分析的实现细节，请参见 \textbf{\ref{自动化语法分析} 自动化语法分析}。
 
 \cleardoublepage
 
@@ -219,11 +219,14 @@ HORAE 的语义致力于清晰明确地阐释符合 HORAE 语法的规则所表�
 
 在根据 HORAE 解析规则时，基本事件相关性仍然是一个挑战：来自同一规则库 的基本事件在自然语言方面可能彼此语义相关或相同，尤其是跨不同规则语句的基本事件。那么如何将这些用自然语言描述的事件抽象成一组符号命题，同时保证语义相关性呢？实际上，这可以通过在自然语言处理中用于评估文本相似性的多种技术来实现，例如 TF-IDF、Word2Vec，以及 BERT。在一系列的测试中，Sentence Transformers 表现出了最佳性能。
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.3\linewidth]{logo/zju}
-    \caption{相似性检验的情境，可知$e_{11} = e_{22} = e_{32}$，$e_{12} = \neg e_{33}$，$e_{13} = \neg e_{23}$，$e_{21} = \neg e_{31}$，$e_{14} = \neg e_{34}$}
-\end{figure}
+\begin{figure*}[ht]
+\begin{align*}
+    s_1 &= \underbrace{\text{员工请求年假}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{11}}} \quad \land \bigg( \underbrace{\text{处于允许期间}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{12}}} \lor \underbrace{\text{经理批准请求}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{13}}} \bigg) \longrightarrow \underbrace{\text{准予假期}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{14}}} \\
+    s_2 &= \underbrace{\text{剩余足够假期余额}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{21}}} \land \underbrace{\text{员工提交假期申请}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{22}}} \land \underbrace{\text{经理拒绝申请}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{23}}} \longrightarrow \underbrace{\text{需要行政复核}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{24}}} \\
+    s_3 &= \bigg( \underbrace{\text{假期余额耗尽}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{31}}} \lor \underbrace{\text{员工申请年假权利}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{32}}} \bigg) \land \underbrace{\text{申请在限制期间内}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{33}}} \longrightarrow \underbrace{\text{请求自动拒绝}}_{\textcolor[rgb]{0.3, 0.5, 1.0}{e_{34}}}
+\end{align*}
+\caption{相似性检验的样例，对于以上三条规则，各包含四个基础事件，其中有表述不同单本质一致的情况：${\textcolor[rgb]{0.3, 0.5, 1.0}{e_{11}}} = {\textcolor[rgb]{0.3, 0.5, 1.0}{e_{22}}} = {\textcolor[rgb]{0.3, 0.5, 1.0}{e_{32}}}$, ${\textcolor[rgb]{0.3, 0.5, 1.0}{e_{12}}} = \neg {\textcolor[rgb]{0.3, 0.5, 1.0}{e_{33}}}$, ${\textcolor[rgb]{0.3, 0.5, 1.0}{e_{13}}} = \neg {\textcolor[rgb]{0.3, 0.5, 1.0}{e_{23}}}$, ${\textcolor[rgb]{0.3, 0.5, 1.0}{e_{21}}} = \neg {\textcolor[rgb]{0.3, 0.5, 1.0}{e_{31}}}$, ${\textcolor[rgb]{0.3, 0.5, 1.0}{e_{14}}} = \neg {\textcolor[rgb]{0.3, 0.5, 1.0}{e_{34}}}$，所以需要相似性检验。}
+\end{figure*}
 
 以下是利用Sentence Transformers 进行相似性检验的步骤：
 \begin{itemize}
@@ -242,6 +245,13 @@ Sentence Transformers 的性能会受到训练数据质量和模型参数的影�
 一致性验证的目的是确定给定的规则库是否包含相互冲突的多个规则。当规则库中的所有规则都能同时被满足时，该规则库就是一致的。验证规则库一致性的核心思想是将其转化为一个可满足性问题（SAT）。首先，我们将基本事件视为布尔变量，表示为 $e_1, e_2, \ldots, e_k$。然后，我们可以将由基本事件组成的规则转换为布尔表达式，表示为 $r_1, r_2, \ldots, r_n$。对于给定的规则库，其所有规则可以形成如下的合取范式（CNF）：
 $$CNF=\bigwedge_{i=1}^{n}r_i=r_1 \land r_2 \land \cdots \land r_n$$
 
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=3.4in]{logo/zju}
+    \caption{规则库相似性检验和一致性验证的示例。首先从自然语言规则中解析出所有基本事件，并将这些规则转换为基本事件和逻辑运算符的组合。在完成相似性检验后，所有语义相似（在此示例中为相同）的基本事件被识别并统一为一个符号，该符号可以被视为布尔变量。最后，通过SAT求解器对规则的合取范式（CNF）进行一致性验证。如果存在一组赋值使得布尔变量满足CNF，则规则库是一致的。}
+    \label{fig_1}
+\end{figure}
+
 Z3求解器可以用来证明这个 CNF 是否可满足，从而验证规则库是否一致。为了进一步说明一致性检验的过程，我们可以将其分解为以下几个步骤：
 
 \begin{itemize}
@@ -258,88 +268,150 @@ Z3求解器可以用来证明这个 CNF 是否可满足，从而验证规则库�
 
 \cleardoublepage
 
-\section{自动化}
+\section{自动化语法分析}\label{自动化语法分析}
 
+将自然语言规则自动化语法分析到 HORAE 规范下是服务监管系统关键的一步。考虑到当前预训练语言模型的流行以及它们对自然语言的理解，本文提出了一种基于微调大语言模型的分步解析方法，下文将其称为 \textbf{ParseGPT}。
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\par 我们可以用includegraphics来插入现有的jpg等格式的图片，如\autoref{fig:zju-logo}。
-
-\begin{figure}[ht]
+\begin{figure*}[ht]
+\centering
+\includegraphics[width=4in]{logo/zju}
+\caption{自动化语法分析的全过程}
+\end{figure*}
+该方法涉及对原始自然语言规则执行三个关键操作：基本事件提取、逻辑关系提取和基本事件模式匹配。实验表明，直接利用大语言模型同时执行这三项操作，即使采用 GPT-4，也无法获得满意的结果。这是因为语法分析过程需要复杂的逻辑推理，在零样本或少样本学习条件下，大语言模型难以迅速掌握语法分析逻辑和方法。为此，本文采取了微调预训练语言模型（PLM）并采用分段式语法分析策略来解决这一特定问题。具体而言，整个过程被划分为以下三个部分：
+\begin{figure*}[ht]
     \centering
-    \includegraphics[width=.4\linewidth]{logo/zju}
-    \caption{\label{fig:zju-logo}浙江大学LOGO}
-\end{figure}
+    \includegraphics[width=4in]{logo/zju}
+    \caption{自动化语法分析的三个部分}
+    \end{figure*}
+\subsection{基本事件提取}
+自动化语法分析的第一步是基本事件提取。尽管基本事件仍以自然语言表达，且同一事件可能存在不同的表达形式，但这并不影响自动化语法分析的后续步骤。在基本事件模式匹配阶段，我们会将本步骤中提取的基本事件与形式化语法相匹配，使得不同的语言表达形式在形式化表示中得以统一。在模型评估阶段，我们需要一种有效的方法来量化评估训练模型的基本事件提取能力。传统方法通常涉及使用诸如 BERT 的编码器对不同句子进行编码，并在特定向量空间中计算编码后的距离，距离越近表示句子间的相似度越高。然而，在自然语言规则的特定情境中，微小的语言差异可能导致显著的语义差异。为应对这一问题，我们考虑采用 SBERT 方法来衡量两个基本事件之间的语义相似性。SBERT 是 BERT 的优化版本，在语义相似性任务上的性能得到了显著提升。在特定模型训练中，本项目选择了 Qwen-7B 这一开源预训练模型，并采用 Lora 方法进行微调。微调训练数据采用 JSON 格式，数据来源为FRR-Eval\footnote{本研究的基础数据集，将在第6章 实验与分析 中详细介绍}中的第一类数据集。每个训练样本遵循问-答模式；"user" 提出特定提示示例，"assistant" 提供所需的分解形式，如图中 Event Extraction。
 
-\par 如\autoref{tab:sample}所示，这是一张自动调节列宽的表格。
+\subsection{逻辑关系提取}
 
-\begin{table}[ht]
-    \caption{\label{tab:sample}自动调节列宽的表格}
-    \begin{tabularx}{\linewidth}{|c|X<{\centering}|}
-        \hline
-        第一列 & 第二列 \\ \hline
-        xxx & xxx \\ \hline
-        xxx & xxx \\ \hline
-        xxx & xxx \\ \hline
-    \end{tabularx}
-\end{table}
+逻辑关系提取是自动化语法分析的重要组成部分。在基本事件提取完成后，需要正确地通过逻辑关系符号连接基本事件。这不仅影响语法分析的准确性，还影响服务监管系统的下游应用。在实际应用场景中，下游任务将评估每个基本事件的发生概率并返回结果。在获得基本事件的概率后，我们需要使用正确的逻辑关系符号来计算规则违规（以及合规）的总体概率。因此，正确的逻辑关系在很大程度上决定了语法分析结果的质量。我们继续使用相同的预训练模型和相同的 Lora 方法进行微调。微调训练数据也以 JSON 文件中的问-答模式呈现，如图中 Logical Relationship。值得注意的是，在逻辑关系提取和基本事件提取的训练中，都使用了 FRR-Eval 中的第一类数据集。原因在于这两个任务具有相同的核心：模型只有在真正理解逻辑关系后才能正确提取基本事件，二者是相互依存的。在构造 FRR-Eval 数据集时，第一类数据集中的基本事件本身在语法上非常简单，适用于分解能力和逻辑理解的训练。
 
-\par 如\autoref{equ:sample}，这是一个公式
+\subsection{基本事件模式匹配}
 
-\begin{equation}
-    \label{equ:sample}
-    A=\overbrace{(a+b+c)+\underbrace{i(d+e+f)}_{\text{虚数}}}^{\text{复数}}
-\end{equation}
+基本事件模式匹配作为自动化语法分析过程的最后一步，标志着从自然语言规则到规范化格式的最终过渡。由于我们语言中定义的基本事件模式数量有限，因此这项任务本质上可以归纳为一个经典的语句分类问题。在本研究中，我们继续使用微调预训练大型模型的方法来实现这一功能。模型和微调方法与之前相同。对于训练数据，我们使用 FRR-Eval 中生成的第二类数据集。与第一类不同，第二类数据集是根据基本事件模式创建基本事件的，也旨在避免现实世界中不同基本事件模式的基本事件数量的显著不平衡。微调训练数据的示例如图中 Syntactic Type Matching。
 
-\par 如\autoref{code:sample}所示，这是一段代码。
-计算机学院的代码样式可能与其他专业不同，
-如有需要，可以从计算机学院专业模板中复制相关的代码样式设定。
+\cleardoublepage
 
-\begin{lstlisting}[%
-    language={C},
-    caption={simple.c},
-    label={code:sample}
-]
-#include <stdio.h>
+\section{实验与分析 }
 
-int main(int argc, char *argv[])
-{
-    printf("Hello, zjuthesis\n");
-    return 0;
-}
-\end{lstlisting}
+本章将通过一系列实验来验证经微调的大语言模型的性能。我们选用的基线模型为Qwen-7B，进行微调训练后再测试。实验中，我们会将其与原版Qwen-7B、Qwen-14B、GPT-3.5进行对比。通过与原版Qwen-7B的对比，我们可以直观地评估微调过程带来的影响。Qwen-14B则代表了目前开源大型语言模型的前沿水平。同时，GPT-3.5则代表了商业大型语言模型的前沿进展。我们将进行三组实验，这些实验分别对应于第4章所述自动化语法分析的三个关键步骤。
 
-\subsection{关于字体}
+\subsection{FRR-Eval 数据集}
 
-英文字体通常提供了粗体和斜体的组合，中文字体通常没有粗体或斜体，本模板使用了 `AutoFakeBold' 来实现中文伪粗体，但不提供中文斜体，如\autoref{tab:font-examples}所示。
+FRR-Eval 数据集是为了评估和训练大型语言模型在自动化语法分析任务中的表现而设计的基准数据集。该数据集包含了来自不同领域的监管规则，用于测试不同模型对 HORAE 的语法分析效果。
 
-\begin{table}
+数据集收集遵循三个原则：确保不同领域之间的显著异质性，寻找多语言规则数据以评估模型对多种语言的适应性，并确保收集到的规则内容是免费、公开的，可供下载和编辑。
+
+FRR-Eval 包括了十个真实数据集，涵盖中英文环境，来源包括城市管理法规、公共法律文件、企业公开文件以及欧盟法律（Eur-lex）。此外，考虑到版权和法律原因，部分领域无法直接公开数据，本研究还使用 GPT-4 结合人工监督生成了四十个流行领域的伪监管规则。
+
+FRR-Eval 数据集包含两种类型的数据：第一种包括规则的原始文本、从这些规则中提取的基本事件列表及其逻辑关系；第二种包括每个领域中各种基本事件及其对应的基本事件模式。这些数据集的作用是训练模型分解原始规则、提取逻辑关系以及将给定的基本事件分类到特定的基本事件模式中。
+
+FRR-Eval 数据集以 JSON 形式全面包含了来自50个领域的监管规则数据，每个领域包含 50 条规则。每个 JSON 对象包含验证集、训练集和测试集，其中验证集包括原始规则、基本事件、逻辑关系和基本事件模式；训练集和测试集包括原始规则数据，用于模型的训练和测试。
+
+为确保标注质量，我们在任务开始前进行了多对多的数据集标注，并采用 Fleiss Kappa 统计量来评估多个标注者在对数据进行分类或编码时的可靠性和一致性。在进行质量评估时，选择了森林资源管理和城市管理两个领域，其 Fleiss Kappa 值分别为 0.845 和 0.864，表明标注一致性达标。
+
+\subsection{基本事件提取能力测试}
+
+本实验对于四种模型在基本事件提取方面的能力进行了比较。由于无法直接判断事件的拆分是否正确，我们采用了基于SBERT相似度得分的加权评估指标。这些指标包括加权准确度（wa）、加权召回率（wr）和加权F1分数（wf1），它们综合考虑了事件之间的语义相似性，从而为模型性能提供了全面评估。
+
+加权准确度（wa）的计算公式如下：
+\[ P_w = \frac{1}{N} \sum_{i=1}^{N} s(e_i, e'_i) \]
+
+其中，\( N \) 是模型生成的基本事件总数，\( e_i \) 是模型生成的第 \( i \) 个基本事件，\( e'_i \) 是与 \( e_i \) 最相似的原始基本事件。\( s(e_i, e'_i) \) 是它们之间的SBERT相似度得分。若 \( e'_i \) 不存在，则 \( s(e_i, e'_i) = 0 \)。
+
+加权召回率的计算公式如下：
+\[ R_w = \frac{1}{M} \sum_{j=1}^{M} s(e'_j, e_j) \]
+
+其中，\( M \) 是数据集中原始基本事件的总数，\( e'_j \) 是第 \( j \) 个原始基本事件，\( e_j \) 是与 \( e'_j \) 最相似的原始基本事件。\( s(e'_j, e_j) \) 是它们之间的SBERT相似度得分。若 \( e_j \) 不存在，则 \( s(e'_j, e_j) = 0 \)。
+
+加权F1分数是加权准确度和加权召回率的调和平均值，其计算公式如下：
+\[ F1_w = 2 \cdot \frac{P_w \cdot R_w}{P_w + R_w} \]
+
+实验结果如表6.1所示。显然，ParseGPT在准确度（wa）指标上表现尤为出色，在九个数据集中取得了最佳结果。然而，在召回率（wr）指标上，ParseGPT略逊于GPT-3.5和Qwen-14B-Chat模型。在相对全面的'wf1'指标上，ParseGPT始终取得最佳或次佳成绩，显著超越了基线模型Qwen-7B-Chat的性能。值得注意的是，ParseGPT在所有中文数据集中均排名第一，而在英文数据集中则被GPT-3.5超越。这可能归因于ParseGPT的基线模型Qwen-7B-Chat更专注于中文语料，而GPT-3.5则更倾向于英文语料。
+
+\begin{table*}[ht]
     \centering
-    \caption{一些字体示例}
-    \label{tab:font-examples}
-    \begin{tabular}{|c|c|c|c|c|}
-        \hline
-        字体            & 常规             & 粗体                       & 斜体                      & 粗斜体                                \\ \hline
-        Times New Roman & Regular         & {\bfseries          Bold} & {\itshape         Italic} & {\bfseries \itshape      BoldItalic} \\ \hline
-        仿宋            & {\fangsong 常规} & {\fangsong \bfseries 粗体} & {\fangsong \itshape 斜体} & {\fangsong \bfseries \itshape 粗斜体} \\ \hline
-        宋体            & {\songti   常规} & {\songti   \bfseries 粗体} & {\songti   \itshape 斜体} & {\songti   \bfseries \itshape 粗斜体} \\ \hline
-        黑体            & {\heiti    常规} & {\heiti    \bfseries 粗体} & {\heiti    \itshape 斜体} & {\heiti    \bfseries \itshape 粗斜体} \\ \hline
-        楷体            & {\kaishu   常规} & {\kaishu   \bfseries 粗体} & {\kaishu   \itshape 斜体} & {\kaishu   \bfseries \itshape 粗斜体} \\ \hline
+    \caption{Basic Event Extraction Performance}
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{@{}lcccccccccccc@{}}
+    \toprule
+     & \multicolumn{3}{c}{Qwen-7B-Chat} & \multicolumn{3}{c}{Qwen-14B-Chat} & \multicolumn{3}{c}{GPT-3.5}  & \multicolumn{3}{c}{ParseGPT} \\
+    \cmidrule(lr){2-4}
+    \cmidrule(lr){5-7}
+    \cmidrule(lr){8-10}
+    \cmidrule(l){11-13}
+         & wa & wr & wf1 &  wa & wr & wf1 & wa & wr & wf1 & wa & wr & wf1  \\
+    \midrule
+    发电厂（中文） &0.48  &0.54  &0.51  &0.53  &0.61  &0.57  &0.63  &\textcolor{red}{0.70}  &0.66  &\textcolor{red}{0.79}  &0.60  &\textcolor{red}{0.68}   \\
+    公共场所安全（中文） &0.46  &0.61&0.52  &0.60  &0.75  &0.67&0.73  &\textcolor{red}{0.80}  &0.76  &\textcolor{red}{0.86}  &0.73  &\textcolor{red}{0.79}    \\
+    旅游（中文） &0.58  &0.61  &0.60  &0.52  &0.67  &0.58  &0.68  &0.55  &0.61  &\textcolor{red}{0.83 } &\textcolor{red}{0.69 } &\textcolor{red}{0.75 }   \\
+    能源监管（中文） &0.49  &0.43  &0.46  &0.61  &0.54  &0.57  &0.59  &\textcolor{red}{0.56}  &0.57  &\textcolor{red}{0.81}  &0.48 &\textcolor{red}{0.60  }  \\
+    城市管理（中文） &0.50  &0.57  &0.53  &0.56  &0.71 &0.63  &0.74  &\textcolor{red}{0.82}  &0.78 &\textcolor{red}{0.85}  &0.74  &\textcolor{red}{0.79  }  \\
+    林产品（英文） &0.32  &0.40  &0.35  &0.33  &0.40  &0.36  &0.54  &\textcolor{red}{0.53}  &\textcolor{red}{0.54}  &\textcolor{red}{0.63}  &0.42  &0.51   \\
+    烟草（英文） &0.35  &0.42  &0.38  &0.38  &0.49  &0.43  &0.54  &\textcolor{red}{0.64}  &\textcolor{red}{0.59}  &\textcolor{red}{0.72}  &0.47  &0.57   \\
+    农产品市场（英文） &0.32  &0.37  &0.34  &0.36  &0.40  &0.38  &0.53  &\textcolor{red}{0.47}  &\textcolor{red}{0.50}  &\textcolor{red}{0.56}  &0.32  &0.41    \\
+    食品安全（英文） &0.25  &0.39  &0.31  &0.33  &0.44  &0.38  &0.47  &\textcolor{red}{0.53}  &\textcolor{red}{0.50}  &\textcolor{red}{0.48}  &0.47  &0.47    \\
+    森林退化（英文） &0.34  &0.41  & 0.37 &0.37  &0.40  &0.38  &\textcolor{red}{0.54}  &\textcolor{red}{0.48}  &\textcolor{red}{0.51}  &0.42  &0.36  &0.40  \\
+    \bottomrule
     \end{tabular}
-\end{table}
+    }
+\end{table*}
 
-\sectionnonum[none]{同一页上的章标题}
+\subsection{逻辑关系提取能力测试}
+
+本实验对于四种模型在逻辑关系提取方面的能力进行了比较。在零样本学习的前提下，我们将手动审查模型输出的逻辑关系。只要模型最终能够提供基本事件之间的正确逻辑关系，不论其表达方式如何，均视为正确。表6.2展示了四种模型在不同数据集上的正确率。
+
+显然，ParseGPT在所有十个数据集上都拥有绝对优势，显著超过了GPT-3.5在提取逻辑关系方面的能力。值得注意的是，ParseGPT的基线模型Qwen-7B-Chat几乎无法识别任何逻辑关系。这反映了我们微调方法的有效性。
+
+\begin{table*}[!t]
+\centering
+\caption{逻辑关系提取正确率}
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+& {Qwen-7B-Chat} & {Qwen-14B-Chat} & {GPT-3.5}  & {ParseGPT} \\
+\midrule
+发电厂（中文） & 0.02 & 0.16 & 0.38  & \textcolor{red}{0.54} \\
+公共场所安全（中文） & 0.04 & 0.27 & 0.57  & \textcolor{red}{0.86} \\
+旅游（中文） & 0.02 & 0.18 & 0.40  &\textcolor{red}{0.76} \\
+能源监管（中文） & 0 & 0.11 & 0.24  & \textcolor{red}{0.56} \\
+城市管理（中文） & 0.12 & 0.34 & 0.38  & \textcolor{red}{0.58} \\
+林产品（英文） & 0.02  & 0.26  & 0.34  & \textcolor{red}{0.50}     \\
+烟草（英文） & 0.02  & 0.28  & 0.36  & \textcolor{red}{0.64}    \\
+农产品市场（英文） & 0  & 0.28  & 0.34  & \textcolor{red}{0.54}     \\
+食品安全（英文） & 0.06  & 0.36  & 0.48  & \textcolor{red}{0.52}     \\
+森林退化（英文） & 0.04  & 0.18  & 0.16  & \textcolor{red}{0.46}   \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{基本事件模式匹配能力测试}
+
+本实验对于四种模型在基本事件模式匹配方面的能力进行了比较。基本事件模式匹配本质上是一个分类任务。如果模型能正确分类类别，则认为正确。表6.3展示了四种模型在不同数据集上的正确率。
+
+可以看出，ParseGPT在大多数数据集中占据主导地位，全面且显著地超过了GPT-3.5的性能，但是在三个数据集中落后于Qwen-14B-Chat。原因可能是这三个数据集的规则特征存在偏向性。例如在“发电厂”的规则数据集中，几乎所有的基本事件模式都是"object action object"。Qwen-14B-Chat倾向于将任何基础事件都匹配为"object action object"的模式，导致在该数据集中的正确率异常偏高。
+
+
+\begin{table*}[!t]
+\centering
+\caption{基本事件模式匹配正确率}
+\begin{tabular}{@{}lcccccccccc@{}}
+\toprule
+数据 & {Qwen-7B-Chat} & {Qwen-14B-Chat} & {GPT-3.5}  & {ParseGPT} \\
+\midrule
+发电厂(中文) &0.68  &\textcolor{red}{0.95}  &0.62   &0.69  \\
+公共场所安全(中文) &0.47 &0.49  &0.13   &\textcolor{red}{0.57}  \\
+旅游(中文) &0.07 &0.18  &0.17   &\textcolor{red}{0.46}  \\
+能源监管(中文) &0.67  &0.74  &0.23   &\textcolor{red}{0.77}  \\
+城市管理(中文) &0.11  &0.13  &0.17   & \textcolor{red}{0.32} \\
+林产品(英文) &0.17  &0.09  &0.19   &\textcolor{red}{0.48}  \\
+烟草(英文) &0.17  &\textcolor{red}{0.39}  &0.17   &0.14  \\
+农产品市场(英文) &0.29  &0.22  &0.08   &\textcolor{red}{0.37}  \\
+食品安全(英文) &0.12  &0.35  &0.15   &\textcolor{red}{0.36}  \\
+森林退化(英文) &0.13  &\textcolor{red}{0.31}  &0.17  &0.22  \\
+\bottomrule
+\end{tabular}
+\end{table*}
