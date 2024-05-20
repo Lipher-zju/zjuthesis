@@ -248,7 +248,7 @@ $$CNF=\bigwedge_{i=1}^{n}r_i=r_1 \land r_2 \land \cdots \land r_n$$
 
 \begin{figure}[!t]
     \centering
-    \includegraphics[width=0.7\linewidth]{fig2.png}
+    \includegraphics[width=0.68\linewidth]{similarity_examination_and_consistency_verification.pdf}
     \caption{规则库相似性检验和一致性验证的示例。首先从自然语言规则中解析出所有基本事件，并将这些规则转换为基本事件和逻辑运算符的组合。在完成相似性检验后，所有语义相似（在此示例中为相同）的基本事件被识别并统一为一个符号，该符号可以被视为布尔变量。最后，通过SAT求解器对规则的合取范式（CNF）进行一致性验证。如果存在一组赋值使得布尔变量满足CNF，则规则库是一致的。}
     \label{fig_1}
 \end{figure}
@@ -275,7 +275,7 @@ Z3求解器可以用来证明这个 CNF 是否可满足，从而验证规则库�
 
 \begin{figure*}[ht]
 \centering
-\includegraphics[width=\linewidth]{fig3.png}
+\includegraphics[width=\linewidth]{ParseGPT.pdf}
 \caption{自动化语法分析的全过程}
 \end{figure*}
 该方法涉及对原始自然语言规则执行三个关键操作：基本事件提取、逻辑关系提取和基本事件模式匹配。实验表明，直接利用大语言模型同时执行这三项操作，即使采用 GPT-4\cite{achiam2023gpt}，也无法获得满意的结果。这是因为语法分析过程需要复杂的逻辑推理，在零样本或少样本学习条件下，大语言模型难以迅速掌握语法分析逻辑和方法。为此，本文采取了微调的预训练语言模型\cite{edunov2019pre}（pre-trained language
@@ -311,7 +311,7 @@ FRR-Eval 数据集是为了评估和训练大语言模型在自动化语法分�
 
 \begin{figure*}[ht]
     \centering
-    \includegraphics[width=\linewidth]{fig5.png}
+    \includegraphics[width=0.9\linewidth]{修改.pdf}
     \caption{FRR-Eval 数据集}
 \end{figure*}
 
